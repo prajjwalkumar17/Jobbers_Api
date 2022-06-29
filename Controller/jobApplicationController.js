@@ -128,3 +128,30 @@ exports.getMyBookmarkedJobs = catchAsync(async (req, res, next) => {
     bookmarks,
   });
 });
+exports.getfeaturedJobs = catchAsync(async (req, res, next) => {
+  const featuredJobs = await JobsModel.find({ Featured: { $eq: true } });
+  if (featuredJobs.length >= 1)
+    return res.status(200).json({
+      status: 'successfull',
+      results: featuredJobs.length,
+      featuredJobs,
+    });
+  else return next(new AppError('No featured jobs as of now', 404));
+});
+
+exports.getRecommendedJobs = catchAsync(async (req, res, next) => {
+  const userSkills = req.user.Skills;
+  const recommendedJobs = await JobsModel.find({
+    Skill_Requirement: { $in: userSkills },
+  });
+  if (recommendedJobs.length >= 1)
+    return res.status(200).json({
+      status: 'successfull',
+      results: recommendedJobs.length,
+      recommendedJobs,
+    });
+  else
+    return next(
+      new AppError('No Recommended jobs as of now update your skills', 404)
+    );
+});
